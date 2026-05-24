@@ -105,24 +105,11 @@ def urgenza_label(task):
     else:
         return "🟢 Bassa"
 
-def formatta_task(task, mostra_id=True):
-    s = task.get('scadenza')
-    scadenza_str = ""
-    if s:
-        if isinstance(s, str):
-            s = date.fromisoformat(s)
-        scadenza_str = f"\n   📅 Scade: {s.strftime('%d/%m/%Y')}"
-
-    gruppo_nome = GRUPPI.get(str(task['gruppo']), "—")
+def formatta_task(task, numero=None):
     label = urgenza_label(task)
+    numero_str = f"{numero}. " if numero else ""
+    return f"{numero_str}{task['titolo']} {label}"
 
-    id_str = f"[#{task['id']}] " if mostra_id else ""
-    return (
-        f"{id_str}{label}\n"
-        f"   📌 {task['titolo']}\n"
-        f"   {gruppo_nome} | P:{task['priorita']} D:{task['difficolta']} | Score:{task['score']}"
-        f"{scadenza_str}"
-    )
 
 # ─── COMANDI ────────────────────────────────────────────────
 
@@ -277,9 +264,10 @@ async def lista(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     tasks.sort(key=lambda x: x['score'], reverse=True)
 
-    testo = f"📋 *Le tue task* ({len(tasks)} totali)\n\n"
-    for task in tasks:
-        testo += formatta_task(task) + "\n\n"
+   testo = f"📋 *Le tue task*\n\n"
+    for i, task in enumerate(tasks, 1):
+        testo += formatta_task(task, numero=i) + "\n"
+
 
     await update.message.reply_text(testo, parse_mode='Markdown')
 
