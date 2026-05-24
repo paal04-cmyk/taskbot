@@ -469,7 +469,6 @@ def main():
     scheduler.add_job(notifica_mattina, 'cron', hour=8, minute=0, args=[app])
     scheduler.add_job(notifica_scadenze, 'cron', hour=9, minute=0, args=[app])
     scheduler.add_job(notifica_scadenze, 'cron', hour=18, minute=0, args=[app])
-    scheduler.start()
 
     print("✅ Bot avviato!")
     app.run_polling()
