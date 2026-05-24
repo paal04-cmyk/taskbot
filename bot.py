@@ -416,6 +416,10 @@ async def notifica_scadenze(app):
     if chat_id:
         await app.bot.send_message(chat_id=chat_id, text=testo, parse_mode='Markdown')
 
+async def test_notifica(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await notifica_mattina(context.application)
+    await notifica_scadenze(context.application)
+
 # ─── MAIN ───────────────────────────────────────────────────
 
 def main():
@@ -457,6 +461,7 @@ def main():
     )
 
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("test", test_notifica))
     app.add_handler(CommandHandler("aiuto", aiuto))
     app.add_handler(CommandHandler("lista", lista))
     app.add_handler(CommandHandler("urgenti", urgenti))
