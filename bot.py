@@ -252,24 +252,29 @@ async def lista(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("📭 Nessuna task in lista.")
         return
 
-    # Ricalcola score aggiornato
+
+    oggi = date.today()
     for t in tasks:
         inserimento = date.fromisoformat(t['inserimento'])
-        giorni_attesa = (date.today() - inserimento).days
+        giorni_attesa = (oggi - inserimento).days
         s = date.fromisoformat(t['scadenza']) if t['scadenza'] else None
         nuovo_score = calcola_score(t['priorita'], t['gruppo'], t['difficolta'], s, giorni_attesa)
         if nuovo_score != t['score']:
             db.aggiorna_score(t['id'], nuovo_score)
             t['score'] = nuovo_score
 
+
     tasks.sort(key=lambda x: x['score'], reverse=True)
 
-   testo = f"📋 *Le tue task*\n\n"
+
+    testo = "📋 *Le tue task*\n\n"
     for i, task in enumerate(tasks, 1):
         testo += formatta_task(task, numero=i) + "\n"
 
 
     await update.message.reply_text(testo, parse_mode='Markdown')
+
+
 
 # ─── URGENTI ────────────────────────────────────────────────
 
