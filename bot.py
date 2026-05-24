@@ -193,28 +193,45 @@ async def aggiungi_difficolta(update: Update, context: ContextTypes.DEFAULT_TYPE
         await update.message.reply_text("Scegli un numero da 1 a 5.")
         return DIFFICOLTA
     context.user_data['difficolta'] = int(val)
-    keyboard = [["Nessuna scadenza"]]
+    keyboard = [
+        ["Oggi", "Domani"],
+        ["2 gg", "3 gg"],
+        ["7 gg", "10 gg"],
+        ["Nessuna scadenza"]
+    ]
     await update.message.reply_text(
-        "Scadenza? Scrivi la data nel formato GG/MM/AAAA oppure premi il tasto.",
+        "Scadenza?",
         reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
     )
     return SCADENZA
 
+
 async def aggiungi_scadenza(update: Update, context: ContextTypes.DEFAULT_TYPE):
     testo = update.message.text.strip()
     scadenza = None
-    if testo.lower() != "nessuna scadenza":
+    oggi = date.today()
+
+    if testo.lower() == "oggi":
+        scadenza = oggi
+    elif testo.lower() == "domani":
+        scadenza = oggi + timedelta(days=1)
+    elif testo.lower() == "2 gg":
+        scadenza = oggi + timedelta(days=2)
+    elif testo.lower() == "3 gg":
+        scadenza = oggi + timedelta(days=3)
+    elif testo.lower() == "7 gg":
+        scadenza = oggi + timedelta(days=7)
+    elif testo.lower() == "10 gg":
+        scadenza = oggi + timedelta(days=10)
+    elif testo.lower() != "nessuna scadenza":
         try:
             scadenza = datetime.strptime(testo, "%d/%m/%Y").date()
         except ValueError:
-            await update.message.reply_text("Formato non valido. Usa GG/MM/AAAA oppure 'Nessuna scadenza'.")
+            await update.message.reply_text("Formato non valido. Usa GG/MM/AAAA.")
             return SCADENZA
 
     d = context.user_data
-    oggi = date.today()
-    inserimento = oggi
-    t = 0  # appena inserita
-
+    t = 0
     score = calcola_score(d['priorita'], d['gruppo'], d['difficolta'], scadenza, t)
 
     task_id = db.aggiungi_task(
@@ -223,7 +240,7 @@ async def aggiungi_scadenza(update: Update, context: ContextTypes.DEFAULT_TYPE):
         gruppo=d['gruppo'],
         difficolta=d['difficolta'],
         scadenza=scadenza.isoformat() if scadenza else None,
-        inserimento=inserimento.isoformat(),
+        inserimento=oggi.isoformat(),
         score=score
     )
 
@@ -234,6 +251,7 @@ async def aggiungi_scadenza(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=ReplyKeyboardRemove()
     )
     return ConversationHandler.END
+
 
 async def annulla(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("❌ Operazione annullata.", reply_markup=ReplyKeyboardRemove())
