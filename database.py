@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import json
 
 DB_PATH = os.environ.get("DB_PATH", "tasks.db")
 
@@ -19,17 +20,24 @@ class Database:
                 difficolta INTEGER NOT NULL,
                 scadenza TEXT,
                 inserimento TEXT NOT NULL,
-                score INTEGER DEFAULT 0,
-                completata INTEGER DEFAULT 0
+                score REAL DEFAULT 0,
+                completata INTEGER DEFAULT 0,
+                ripetizione TEXT
+            )
+        """)
+        self.conn.execute("""
+            CREATE TABLE IF NOT EXISTS pianificazione (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                titolo TEXT NOT NULL
             )
         """)
         self.conn.commit()
 
-    def aggiungi_task(self, titolo, priorita, gruppo, difficolta, scadenza, inserimento, score):
+    def aggiungi_task(self, titolo, priorita, gruppo, difficolta, scadenza, inserimento, score, ripetizione=None):
         cur = self.conn.execute(
-            "INSERT INTO tasks (titolo, priorita, gruppo, difficolta, scadenza, inserimento, score) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (titolo, priorita, gruppo, difficolta, scadenza, inserimento, score)
+            "INSERT INTO tasks (titolo, priorita, gruppo, difficolta, scadenza, inserimento, score, ripetizione) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (titolo, priorita, gruppo, difficolta, scadenza, inserimento, score, ripetizione)
         )
         self.conn.commit()
         return cur.lastrowid
@@ -55,4 +63,18 @@ class Database:
 
     def cancella_task(self, task_id):
         self.conn.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+        self.conn.commit()
+
+    def salva_pianificazione(self, titoli):
+        self.conn.execute("DELETE FROM pianificazione")
+        for t in titoli:
+            self.conn.execute("INSERT INTO pianificazione (titolo) VALUES (?)", (t,))
+        self.conn.commit()
+
+    def get_pianificazione(self):
+        cur = self.conn.execute("SELECT titolo FROM pianificazione")
+        return [row['titolo'] for row in cur.fetchall()]
+
+    def cancella_pianificazione(self):
+        self.conn.execute("DELETE FROM pianificazione")
         self.conn.commit()
