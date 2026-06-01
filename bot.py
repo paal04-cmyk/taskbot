@@ -667,6 +667,8 @@ def main():
     scheduler.add_job(checkin_ripetitive, 'cron', hour=8, minute=0, args=[app])
 
     print("✅ Bot avviato!")
+    print(f"CHAT_ID configurato: {os.environ.get('CHAT_ID')}")
+    print(f"Scheduler jobs: {scheduler.get_jobs()}")
     app.run_polling()
 
 if __name__ == "__main__":
