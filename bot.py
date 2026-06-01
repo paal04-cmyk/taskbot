@@ -596,11 +596,15 @@ async def checkin_ripetitive(app):
                 
 async def test_notifica(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = os.environ.get("CHAT_ID")
-    await context.application.bot.send_message(
-        chat_id=chat_id,
-        text="🔔 Test notifica diretta! Se vedi questo con l'app chiusa, le notifiche funzionano."
-    )
-    await update.message.reply_text("✅ Messaggio inviato al tuo CHAT_ID")
+    await update.message.reply_text(f"CHAT_ID letto: '{chat_id}'\nTipo: {type(chat_id)}")
+    try:
+        await context.application.bot.send_message(
+            chat_id=int(chat_id),
+            text="🔔 Test notifica!"
+        )
+        await update.message.reply_text("✅ Inviato!")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Errore: {e}")
     
 # ─── MAIN ───────────────────────────────────────────────────
 
