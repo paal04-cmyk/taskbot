@@ -593,6 +593,10 @@ async def checkin_ripetitive(app):
             scadenza = date.fromisoformat(s)
             if scadenza <= oggi:
                 await invia_checkin(app.bot, chat_id, task)
+                
+async def test_notifica(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await notifica_recap_mattina(context.application)
+    await update.message.reply_text("✅ Test notifiche inviato!")
 
 # ─── MAIN ───────────────────────────────────────────────────
 
@@ -644,6 +648,7 @@ def main():
     app.add_handler(conv_cancella)
     app.add_handler(conv_pianifica)
     app.add_handler(CallbackQueryHandler(checkin_risposta, pattern="^checkin_"))
+    app.add_handler(CommandHandler("test", test_notifica))
 
     # Scheduler
     scheduler = AsyncIOScheduler(timezone="Europe/Rome")
