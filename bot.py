@@ -595,17 +595,13 @@ async def checkin_ripetitive(app):
                 await invia_checkin(app.bot, chat_id, task)
                 
 async def test_notifica(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("⏳ Test in corso, riceverai 3 notifiche nei prossimi 3 minuti con l'app chiusa...")
-    await notifica_recap_mattina(context.application)
-    context.job_queue.run_once(
-        lambda ctx: notifica_urgenti_periodica(ctx.application),
-        when=timedelta(seconds=60)
+    chat_id = os.environ.get("CHAT_ID")
+    await context.application.bot.send_message(
+        chat_id=chat_id,
+        text="🔔 Test notifica diretta! Se vedi questo con l'app chiusa, le notifiche funzionano."
     )
-    context.job_queue.run_once(
-        lambda ctx: notifica_dimenticate(ctx.application),
-        when=timedelta(seconds=120)
-    )
-
+    await update.message.reply_text("✅ Messaggio inviato al tuo CHAT_ID")
+    
 # ─── MAIN ───────────────────────────────────────────────────
 
 def main():
