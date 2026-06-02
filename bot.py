@@ -1,6 +1,8 @@
 import os
 import logging
 import random
+import threading
+from flask import Flask
 from datetime import datetime, date, timedelta
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (
@@ -605,7 +607,16 @@ async def test_notifica(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("✅ Inviato!")
     except Exception as e:
         await update.message.reply_text(f"❌ Errore: {e}")
-    
+
+def avvia_web_server():
+    flask_app = Flask(__name__)
+
+    @flask_app.route('/')
+    def home():
+        return "Bot attivo!", 200
+
+    port = int(os.environ.get("PORT", 8080))
+    flask_app.run(host='0.0.0.0', port=port)
 # ─── MAIN ───────────────────────────────────────────────────
 
 def main():
@@ -679,6 +690,7 @@ def main():
     # Check-in ripetitive ogni mattina ore 8
     scheduler.add_job(checkin_ripetitive, 'cron', hour=8, minute=0, args=[app])
 
+    threading.Thread(target=avvia_web_server, daemon=True).start()
     print("✅ Bot avviato!")
     print(f"CHAT_ID configurato: {os.environ.get('CHAT_ID')}")
     print(f"Scheduler jobs: {scheduler.get_jobs()}")
