@@ -597,16 +597,13 @@ async def checkin_ripetitive(app):
                 await invia_checkin(app.bot, chat_id, task)
                 
 async def test_notifica(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = os.environ.get("CHAT_ID")
-    await update.message.reply_text(f"CHAT_ID letto: '{chat_id}'\nTipo: {type(chat_id)}")
-    try:
-        await context.application.bot.send_message(
-            chat_id=int(chat_id),
-            text="🔔 Test notifica!"
+    await update.message.reply_text("⏳ Tra 20 secondi arriva la notifica. Chiudi Telegram ora!")
+    async def manda_notifica(ctx):
+        await ctx.bot.send_message(
+            chat_id=int(os.environ.get("CHAT_ID")),
+            text="🔔 Notifica di test! Lo scheduler funziona."
         )
-        await update.message.reply_text("✅ Inviato!")
-    except Exception as e:
-        await update.message.reply_text(f"❌ Errore: {e}")
+    context.job_queue.run_once(manda_notifica, when=20)
 
 def avvia_web_server():
     flask_app = Flask(__name__)
